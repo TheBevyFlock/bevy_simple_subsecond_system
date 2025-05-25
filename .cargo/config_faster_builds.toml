@@ -1,5 +1,3 @@
-# This file contains some fast build optimizations that work well with subsecond.
-
 [unstable]
 codegen-backend = true
 
@@ -8,11 +6,14 @@ incremental = true
 
 [profile.dev]
 codegen-backend = "cranelift"
+debug = false
 
-# Consider compiling deps with llvm for runtime perf and working `#[should_panic]`
-# If you don't have any tests that `#[should_panic]`, comment this out for *massive* speedups
-# For me, it makes a 16 minute build take 6 minutes.
+# Consider compiling deps with cranelift if you want cold-compilation to be faster
 [profile.dev.package."*"]
+codegen-backend = "llvm"
+
+# cranelift is `panic = abort`, so you need to compile with llvm to get `#[should_panic]` working
+[profile.test.package."*"]
 codegen-backend = "llvm"
 
 # Disable cranelift for release profile
@@ -24,39 +25,27 @@ codegen-backend = "llvm"
 codegen-backend = "llvm"
 
 [build]
-# target-dir = "/home/your_name/.cargo/global-target"
-# ^ Using a global target-dir is a great way to do caching
-# but breaks subsecond when used with mold!
-# Use `ln -s /home/your_name/.cargo/global_target target` instead
-
-[target.wasm32-unknown-unknown]
-# We cannot really change the linker for wasm32-unknown-unknown
-rustflags = [
-    "--cfg",
-    "getrandom_backend=\"wasm_js\"",
-    # Nightly
-    "-Zshare-generics=y",
-    "-Zthreads=0",
-]
-rustdocflags = [
-    "--cfg",
-    "getrandom_backend=\"wasm_js\"",
-    # Nightly
-    "-Zshare-generics=y",
-    "-Zthreads=0",
-]
+# Requires setting `CARGO=1` or it breaks `Bevy CLI`: https://github.com/TheBevyFlock/bevy_cli/issues/429
+rustc-wrapper = "/home/hhh/.cargo/bin/sccache"
+# Using a global target dir allows all projects to share incremental compilation results,
+# vastly speeding up cold-compilation of new projects.
+target-dir = "/home/hhh/.cargo/global-target"
 
 [target.x86_64-unknown-linux-gnu]
-# Not setting linker explicitly to mold because it is already globally symlinked to ld
+# Linker commented out due to https://github.com/DioxusLabs/dioxus/issues/4193
+# Instead, the global `cc` is symlinked to `clang`
+# linker = "clang"
 rustflags = [
+    "-C",
+    "link-arg=-fuse-ld=mold",
     # Nightly
     "-Zshare-generics=y",
-    "-Zthreads=0",
-    # Use our default system linker -> mold
-    "-Zlinker-features=-lld",
+    "-Zthreads=8",
 ]
 rustdocflags = [
+    "-C",
+    "link-arg=-fuse-ld=mold",
     # Nightly
     "-Zshare-generics=y",
-    "-Zthreads=0",
+    "-Zthreads=8",
 ]

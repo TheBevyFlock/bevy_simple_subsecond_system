@@ -4,8 +4,8 @@
 [![docs.rs](https://docs.rs/bevy_simple_subsecond_system/badge.svg)](https://docs.rs/bevy_simple_subsecond_system)
 
 
-Hotpatch your Bevy systems, allowing you to change their code while the app is running and directly seeing the results!
-This is a intermediate solution you can use until [Bevy has implement this feature upstream](https://github.com/bevyengine/bevy/issues/19296).
+Hotpatch your Bevy systems, allowing you to change their code while the app is running and directly see the results!
+This is an intermediate solution you can use until [Bevy implements this feature upstream](https://github.com/bevyengine/bevy/issues/19296).
 
 Powered by [Dioxus' subsecond](https://github.com/DioxusLabs/dioxus/releases/tag/v0.7.0-alpha.0#rust-hot-patching)  
 Please report all hotpatch-related problems to them :)
@@ -17,16 +17,32 @@ Please report all hotpatch-related problems to them :)
 
 ## First Time Installation
 
-First, we'll install [cargo-binstall](https://github.com/cargo-bins/cargo-binstall). It's not strictly required, but it will make the setup much quicker.
-Click your OS below on instructions for how to do this
+First, we need to install a specific version of the Dioxus CLI.
+
+```sh
+cargo install dioxus-cli --git https://github.com/DioxusLabs/dioxus --rev b2bd1f
+```
+
+Depending on your OS, you'll have to set up your environment a bit more:
+
 <details>
 <summary>
 Windows
 </summary>
 
-```pwsh
-Set-ExecutionPolicy Unrestricted -Scope Process; iex (iwr "https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.ps1").Content
+If you're lucky, you don't need to change anything.
+However, some users may experience issues with their path length.
+If that happens, move your crate closer to your drive, e.g. `C:\my_crate`.
+If that is not enough, set the following in your `~\.cargo\config.toml`:
+```toml
+[profile.dev]
+codegen-units = 1
 ```
+Note that this may increase compile times significantly if your crate is very large. If you can verify that this solved your issue,
+try increasing this number until you find a happy middle ground. For reference, the default number
+for incremental builds is `256`, and for non-incremental builds `16`.
+
+You also cannot set `linker = "rust-lld.exe"`, as subsecond currently crashes when `linker` is set.
 
 </details>
 
@@ -35,10 +51,8 @@ Set-ExecutionPolicy Unrestricted -Scope Process; iex (iwr "https://raw.githubuse
 macOS
 </summary>
 
-```sh
-brew install cargo-binstall
-```
-or, if you don't use `brew`, same as on Linux.
+You're in luck! Everything should work out of the box if you use the default system linker.
+
 </details>
 
 <details>
@@ -46,62 +60,51 @@ or, if you don't use `brew`, same as on Linux.
 Linux
 </summary>
 
+Execute the following:
 ```sh
-curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+readlink -f "$(which cc)"
 ```
-</details>
-<details>
-<summary>
-Build from source
-</summary>
+If this points to `clang`, you're good. Otherwise, we'll need to symlink it.
+Read the path returned by the following command:
+```sh
+which cc
+```
+and `cd` into it. For example,
 
 ```sh
-cargo install cargo-binstall
-```
-</details>
-
-Now, we need to install the Dioxus CLI of the newest alpha build.
-```sh
-cargo binstall dioxus-cli@0.7.0-alpha.0
+$ which cc
+/usr/bin/cc
+$ cd /usr/bin
 ```
 
-Windows users need to install from a specific branch for now:
+Assuming you have `clang` installed, run the following commands:
+
 ```sh
-cargo install dioxus-cli --git https://github.com/DioxusLabs/dioxus/ --branch jk/fix-dyn-link-subsecond
+mv cc cc-real
+ln -s "$(which clang)" cc
+```
+Note that the above commands may require `sudo`.
+
+Now everything should work. If not, install `lld` on your system and add the following to your `~/.cargo/config.toml`:
+
+```toml
+[target.x86_64-unknown-linux-gnu]
+rustflags = [
+  "-Clink-arg=-fuse-ld=lld",
+]
 ```
 
-Then make sure you're not using [LD as your linker](https://github.com/DioxusLabs/dioxus/issues/4144).
-Click your OS below on instructions for how to do this
+If you prefer to use `mold`, you can set it up like this:
 
-> In case you already configured a linker, setting `rustflags = ["-C", "link-arg=-fuse-ld=/path/to/your/linker"]` is surprisingly [not enough](https://github.com/DioxusLabs/dioxus/issues/4146)!
-
-<details>
-<summary>
-Windows
-</summary>
-
-The linker should work out of the box, but there may be issues with path lengths.
-
-</details>
-
-<details>
-<summary>
-macOS
-</summary>
-
-You're in luck! The default linker on macOS is already something other than LD. You don't have to change a thing :)
-</details>
-
-<details>
-<summary>
-Linux
-</summary>
-
-Download `clang` and [`mold`](https://github.com/rui314/mold) for your distribution, e.g.
-```sh
-sudo apt-get install clang mold
+```toml
+[target.x86_64-unknown-linux-gnu]
+#linker = clang
+rustflags = [
+  "-Clink-arg=-fuse-ld=mold",
+]
 ```
-Then, replace your system `ld` with a symlink to `mold`. The most brutal way to do this is:
+Note that the `linker` key needs to be commented out.
+You will also need to replace your system `ld` with `mold`.
 ```sh
 cd /usr/bin
 sudo mv ld ld-real
@@ -148,8 +151,11 @@ fn main() {
 }
 
 #[hot]
-fn greet() {
-    info!("Hello from a hotpatched system! Try changing this string while the app is running!")
+fn greet(time: Res<Time>) {
+    info_once!(
+        "Hello from a hotpatched system! Try changing this string while the app is running! Patched at t = {} s",
+        time.elapsed_secs()
+    );
 }
 ```
 
@@ -158,6 +164,11 @@ Now run your app with
 ```sh
 dx serve --hot-patch
 ```
+
+Now try changing that string at runtime and then check your logs!
+
+Note that changing the `greet` function's signature at runtime by e.g. adding a new parameter will still require a restart.
+In general, you can only change the code *inside* the function at runtime. See the *Advanced Usage* section for more.
 
 ## Examples
 
@@ -168,9 +179,49 @@ dx serve --hot-patch --example name_of_the_example
 
 e.g.
 ```sh
-dx serve --hot-patch --example rerun_setup
+dx serve --hot-patch --example patch_on_update
 ```
 
+## Language Servers
+
+In general, rust analyzer for VS Code will play nice with the `#[hot]` attribute.
+If you're running into issues, you can add the following to your VS Code settings:
+<details><summary>settings.json</summary>
+
+```json
+"rust-analyzer.procMacro.ignored": {
+    "bevy_simple_subsecond_system_macros": [
+        "hot"
+    ]
+},
+"rust-analyzer.diagnostics.disabled": [
+    "proc-macro-disabled"
+]
+```
+</details>
+<br/>
+For LSP-based workflows, use the following:
+
+<details><summary>LSP</summary>
+
+```lua
+lspconfig.rust_analyzer.setup({
+  capabilities = capabilities,
+  settings = {
+    ["rust-analyzer"] = {
+      procMacro = {
+        ignored = {
+          bevy_simple_subsecond_system_macros = { "hot" },
+        },
+      },
+      diagnostics = {
+        disabled = { "proc-macro-disabled" },
+      },
+    },
+  },
+})
+```
+</details>
 
 
 ## Advanced Usage
@@ -214,16 +265,12 @@ This allows you to e.g. add additional `Query` or `Res` parameters or modify exi
 ## Features
 
 - Change systems' code and see the effect live at runtime
-- Change system signatures at runtime, e.g. by adding a new query or modifying an existing one
 - If your system calls other functions, you can also change those functions' code at runtime
-- Rerun setup systems automatically when changing them
 - Extremely small API: You only need the plugin struct and the `#[hot]` attribute
 - Automatically compiles itself out on release builds and when targetting Wasm. The `#[hot]` attribute does simply nothing on such builds.
 
 ## Known Limitations
 
-- Cannot [combine mold as your Rust linker with a global target dir](https://github.com/DioxusLabs/dioxus/issues/4149)
-- Using this [breaks dynamic linking](https://github.com/DioxusLabs/dioxus/issues/4154)
 - A change in the definition of structs that appear in hot-patched systems at runtime will result in your query failing to match, as that new type does not exist in `World` yet.
   - Practically speaking, this means you should not change the definition of `Resource`s and `Component`s of your system at runtime
 - Only [the topmost binary is hotpatched](https://github.com/DioxusLabs/dioxus/issues/4160), meaning your app is not allowed to have a `lib.rs` or a workspace setup.
@@ -237,4 +284,4 @@ This allows you to e.g. add additional `Query` or `Res` parameters or modify exi
 
 | bevy        | bevy_simple_subsecond_system |
 |-------------|------------------------|
-| 0.16        | 0.1                    |
+| 0.16        | 0.2                    |

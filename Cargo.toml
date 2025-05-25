@@ -3,7 +3,7 @@ members = [".", "examples/*", "macros"]
 
 [package]
 name = "bevy_simple_subsecond_system"
-version = "0.1.11"
+version = "0.2.0"
 edition = "2024"
 authors = ["Jan Hohenheim <jan@hohenheim.ch>"]
 exclude = ["examples/"]
@@ -24,12 +24,16 @@ bevy_ecs_macros = { version = "0.16.0" }
 bevy_reflect = { version = "0.16.0" }
 bevy_utils = { version = "0.16.0" }
 bevy_internal = { version = "0.16.0", features = ["track_location"] }
-dioxus-devtools = { version = "0.7.0-alpha.0" }
-bevy_simple_subsecond_system_macros = { path = "macros", version = "0.1.7" }
+dioxus-devtools = { version = "0.7.0-alpha.0", git = "https://github.com/DioxusLabs/dioxus.git", rev = "b2bd1f" }
+bevy_simple_subsecond_system_macros = { path = "macros", version = "0.1.8" }
 crossbeam-channel = "0.5.15"
 send_wrapper = "0.6.0"
 [dev-dependencies]
-bevy = { version = "0.16.0", features = ["bevy_ui_debug", "track_location"] }
+bevy = { version = "0.16.0", features = [
+    "bevy_ui_debug",
+    "track_location",
+    "dynamic_linking",
+] }
 
 [lints.clippy]
 # Bevy supplies arguments to systems via dependency injection, so it's natural for systems to

@@ -122,6 +122,7 @@ pub mod __macros_internal {
     pub use bevy_ecs_macros::Resource;
     pub use bevy_log::debug;
     use bevy_platform::collections::{HashMap, HashSet};
+    use dioxus_devtools::subsecond::HotFnPtr;
     use std::any::TypeId;
 
     #[derive(Resource, Default)]
@@ -129,8 +130,8 @@ pub mod __macros_internal {
 
     #[doc(hidden)]
     pub struct __HotPatchedSystem {
-        pub current_ptr: u64,
-        pub last_ptr: u64,
+        pub current_ptr: HotFnPtr,
+        pub last_ptr: HotFnPtr,
     }
 
     #[doc(hidden)]
