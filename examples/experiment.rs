@@ -53,10 +53,11 @@ trait HotSystemExt {
 }
 impl HotSystemExt for ScheduleSystem {
     fn with_hotpatching(mut self) -> ScheduleSystem {
-        let a = IntoSystem::into_system(move |world: &mut World| {
+        // This creates an exclusive system because it's easy for the POC,
+        // but I believe it should be technically feasible to make it a regular system with the same signature as the original.
+        Box::new(IntoSystem::into_system(move |world: &mut World| {
             HotFn::current(|world: &mut World| self.run((), world)).call((world,))
-        });
-        Box::new(a)
+        }))
     }
 }
 
