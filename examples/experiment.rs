@@ -9,6 +9,7 @@ fn main() -> AppExit {
         .add_plugins(DefaultPlugins)
         .add_plugins(SimpleSubsecondPlugin::default())
         .add_systems(Update, greet)
+        // Needs to be called after all systems are added
         .enable_hotpatching()
         .run()
 }
