@@ -20,6 +20,9 @@ fn greet(time: Res<Time>) {
     );
 }
 
+// User code ends here
+// Now come unsafe shenanigans
+
 trait HotAppExt {
     fn enable_hotpatching(&mut self) -> &mut App;
 }
@@ -56,11 +59,11 @@ impl HotSystemExt for ScheduleSystem {
     }
 }
 
-trait CloneUnchecked {
+trait CloneShallow {
     unsafe fn clone_shallow(&self) -> ScheduleSystem;
 }
 
-impl CloneUnchecked for ScheduleSystem {
+impl CloneShallow for ScheduleSystem {
     unsafe fn clone_shallow(&self) -> ScheduleSystem {
         // Bitwise copy of the fat pointer
         let raw = self.as_ref() as *const dyn System<In = (), Out = Result>;
