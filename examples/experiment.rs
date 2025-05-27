@@ -37,12 +37,16 @@ impl HotAppExt for App {
             schedule.initialize(self.world_mut()).unwrap();
             let interned_label = schedule.label();
             for (_node_id, system) in schedule.systems().unwrap() {
+                // SAFETY: we now have two `Box`es pointing to the same data, so we should absolutely never ever
+                // touch the original `system` again. This includes not calling `drop` on it, see below.
                 let cloned = unsafe { system.clone_shallow() };
                 let hot_system = cloned.with_hotpatching();
                 new_schedules.add_systems(interned_label, hot_system);
             }
         }
         *self.world_mut().resource_mut::<Schedules>() = new_schedules;
+        // SAFETY: `new_schedules` already took ownership of the old schedules, so we need to leak the
+        // original one to avoid the memory being freed twice.
         Box::leak(Box::new(old_schedules));
         self
     }
