@@ -1,7 +1,4 @@
-use std::{
-    mem::ManuallyDrop,
-    ops::{Deref as _, DerefMut as _},
-};
+use std::ops::DerefMut as _;
 
 use bevy::prelude::*;
 use bevy_ecs::system::ScheduleSystem;
@@ -42,13 +39,10 @@ impl HotAppExt for App {
             }
         }
         *self.world_mut().resource_mut::<Schedules>() = new_schedules;
-        self.insert_resource(OriginalSchedules(old_schedules));
+        Box::leak(Box::new(old_schedules));
         self
     }
 }
-
-#[derive(Resource)]
-struct OriginalSchedules(#[allow(dead_code)] Schedules);
 
 trait HotSystemExt {
     fn with_hotpatching(self) -> ScheduleSystem;
