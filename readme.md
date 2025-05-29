@@ -89,28 +89,6 @@ The prerequisites for that config are:
 
 </details>
 
-<details>
-<summary>
-NixOS
-</summary>
-
-On NixOS you can set mold to be used in a shell by replacing:
-```nix
-pkgs.mkShell {
-    # ..
-}
-```
-with:
-```nix
-pkgs.mkShell.override {
-    stdenv = pkgs.stdenvAdapters.useMoldLinker pkgs.clangStdenv;
-} {
-    # ..
-}
-```
-
-</details>
-
 ## Usage
 
 Add the crate to your dependencies. Make sure to depend on the git version:
