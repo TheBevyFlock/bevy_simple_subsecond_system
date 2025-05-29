@@ -1,3 +1,10 @@
+# The full prerequisites for this config are:
+# - nightly rust: rustup toolchain install nightly
+# - cranelift: rustup component add rustc-codegen-cranelift-preview --toolchain nightly
+# - mold linker: https://github.com/rui314/mold#installation 
+# - sccache: https://github.com/mozilla/sccache#installation
+
+
 [unstable]
 codegen-backend = true
 
@@ -32,9 +39,10 @@ rustc-wrapper = "/home/hhh/.cargo/bin/sccache"
 target-dir = "/home/hhh/.cargo/global-target"
 
 [target.x86_64-unknown-linux-gnu]
-# Linker commented out due to https://github.com/DioxusLabs/dioxus/issues/4193
-# Instead, the global `cc` is symlinked to `clang`
-# linker = "clang"
+# Note: make sure you've installed dioxus CLI with
+# cargo install dioxus-cli --git https://github.com/laundmo/dioxus --branch=subsecond-fuse-ld
+# otherwise linker= and link-arg=-fuse-ld= won't work
+linker = "clang"
 rustflags = [
     "-C",
     "link-arg=-fuse-ld=mold",

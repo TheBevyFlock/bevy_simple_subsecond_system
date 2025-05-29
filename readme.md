@@ -20,20 +20,23 @@ Please report all hotpatch-related problems to them :)
 First, we need to install a specific version of the Dioxus CLI.
 
 ```sh
-cargo install dioxus-cli --git https://github.com/DioxusLabs/dioxus --rev b2bd1f
+cargo install dioxus-cli --git https://github.com/laundmo/dioxus --branch=subsecond-fuse-ld
 ```
 
 Depending on your OS, you'll have to set up your environment a bit more:
 
+#### Windows
+For some users, this should work out of the box on Windows
+
 <details>
 <summary>
-Windows
+See here if you have issues with path length
 </summary>
 
-If you're lucky, you don't need to change anything.
-However, some users may experience issues with their path length.
+
 If that happens, move your crate closer to your drive, e.g. `C:\my_crate`.
-If that is not enough, set the following in your `~\.cargo\config.toml`:
+
+If that is not enough, create or edit either a global `~\.cargo\config.toml` or a local `.\.cargo\config.toml` with this config:
 ```toml
 [profile.dev]
 codegen-units = 1
@@ -44,92 +47,39 @@ If you can verify that this solved your issue,
 try increasing this number until you find a happy middle ground. For reference, the default number
 for incremental builds is `256`, and for non-incremental builds `16`.
 
-You also cannot set `linker = "rust-lld.exe"`, as subsecond currently crashes when `linker` is set.
-
 </details>
 
-<details>
-<summary>
-macOS
-</summary>
+#### MacOS
+
 
 You're in luck! Everything should work out of the box if you use the default system linker.
 
-</details>
+
+#### Linux
+
+Prerequisites: `clang` and either `lld` (recommended) or `mold` (faster, but less stable)
 
 <details>
 <summary>
-Linux
+Minimal config
 </summary>
 
-Execute the following:
-```sh
-readlink -f "$(which cc)"
-```
-If this points to `clang`, you're good. Otherwise, we'll need to symlink it.
-Read the path returned by the following command:
-```sh
-which cc
-```
-and `cd` into it. For example,
-
-```sh
-$ which cc
-/usr/bin/cc
-$ cd /usr/bin
-```
-
-Assuming you have `clang` installed, run the following commands:
-
-```sh
-mv cc cc-real
-ln -s "$(which clang)" cc
-```
-Note that the above commands may require `sudo`.
-
-Now everything should work. If not, install `lld` on your system and add the following to your `~/.cargo/config.toml`:
-
+Create or edit either a global `~/.cargo/config.toml` or a local `./.cargo/config.toml` with this minimal config
 ```toml
 [target.x86_64-unknown-linux-gnu]
+linker = "clang"
 rustflags = [
-  "-Clink-arg=-fuse-ld=lld",
+  "-C",
+  "link-arg=-fuse-ld=lld",
 ]
 ```
 
-## Mold
+This repo includes `./.cargo/config_faster_builds.toml` which contains other compile-time improving configs known to work with subsecond.
 
-Subsecond works best with `lld` right now, so we recommend using that linker.
-If you want to try using `mold`, you can set it up like this:
-
-```toml
-[target.x86_64-unknown-linux-gnu]
-#linker = clang
-rustflags = [
-  "-Clink-arg=-fuse-ld=mold",
-]
-```
-Note that the `linker` key needs to be commented out.
-You will also need to replace your system `ld` with `mold`.
-```sh
-cd /usr/bin
-sudo mv ld ld-real
-sudo ln -s mold ld
-```
-
-On NixOS you can do this in a shell by replacing:
-```nix
-pkgs.mkShell {
-    # ..
-}
-```
-with:
-```nix
-pkgs.mkShell.override {
-    stdenv = pkgs.stdenvAdapters.useMoldLinker pkgs.clangStdenv;
-} {
-    # ..
-}
-```
+> ⚠️ WARNING
+> In the past we recommended symlinking mold over /usr/bin/ld
+> Please make sure to undo this to avoid issues with your installation
+> cause by incompatibilities, such as DKMS failing to load modules
 
 </details>
 
@@ -189,9 +139,9 @@ dx serve --hot-patch --example patch_on_update
 
 ## Language Servers
 
-In general, rust analyzer for VS Code will play nice with the `#[hot]` attribute.
-If you're running into issues, you can add the following to your VS Code settings:
-<details><summary>settings.json</summary>
+In general, rust-analyzer will play nice with the `#[hot]` attribute.
+If you're running into issues, you can configure your editor like this:
+<details><summary>VSCode settings.json</summary>
 
 ```json
 "rust-analyzer.procMacro.ignored": {
@@ -205,9 +155,8 @@ If you're running into issues, you can add the following to your VS Code setting
 ```
 </details>
 <br/>
-For LSP-based workflows, use the following:
 
-<details><summary>LSP</summary>
+<details><summary>Vim lspconfig</summary>
 
 ```lua
 lspconfig.rust_analyzer.setup({
@@ -287,6 +236,6 @@ This allows you to e.g. add additional `Query` or `Res` parameters or modify exi
 
 ## Compatibility
 
-| bevy        | bevy_simple_subsecond_system |
-|-------------|------------------------|
-| 0.16        | 0.2                    |
+| bevy | bevy_simple_subsecond_system |
+| ---- | ---------------------------- |
+| 0.16 | 0.2                          |
