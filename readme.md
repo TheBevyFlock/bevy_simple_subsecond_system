@@ -57,7 +57,7 @@ You're in luck! Everything should work out of the box if you use the default sys
 
 #### Linux
 
-Prerequisites: `clang` and either `lld` or `mold`
+Prerequisites: `clang` and either `lld` (recommended) or `mold` (faster, but less stable)
 
 <details>
 <summary>
