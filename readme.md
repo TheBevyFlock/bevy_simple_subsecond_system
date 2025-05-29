@@ -36,7 +36,7 @@ See here if you have issues with path length
 
 If that happens, move your crate closer to your drive, e.g. `C:\my_crate`.
 
-If that is not enough, set the following in your `~\.cargo\config.toml`:
+If that is not enough, create or edit either a global `~\.cargo\config.toml` or a local `.\.cargo\config.toml` with this config:
 ```toml
 [profile.dev]
 codegen-units = 1
@@ -64,7 +64,7 @@ Prerequisites: `clang` and either `lld` (recommended) or `mold` (faster, but les
 Minimal config
 </summary>
 
-Create or edit `./.cargo/config.toml`, with this minimal config
+Create or edit either a global `~/.cargo/config.toml` or a local `./.cargo/config.toml` with this minimal config
 ```toml
 [target.x86_64-unknown-linux-gnu]
 linker = "clang"
