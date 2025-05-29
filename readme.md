@@ -76,12 +76,6 @@ rustflags = [
 
 This repo includes `./.cargo/config_faster_builds.toml` which contains other compile-time improving configs known to work with subsecond.
 
-The prerequisites for that config are:
-- `nightly` rust: `rustup toolchain install nightly` 
-- `cranelift`, installed through `rustup component add rustc-codegen-cranelift-preview --toolchain nightly`
-- [mold](https://github.com/rui314/mold#installation) linker 
-- [sccache](https://github.com/mozilla/sccache#installation) build cache
-
 > [!WARNING]  
 > In the past we recommended symlinking mold over /usr/bin/ld
 > Please make sure to undo this to avoid issues with your installation
