@@ -76,7 +76,7 @@ rustflags = [
 
 This repo includes `./.cargo/config_faster_builds.toml` which contains other compile-time improving configs known to work with subsecond.
 
-> [!WARNING]  
+> ⚠️ WARNING
 > In the past we recommended symlinking mold over /usr/bin/ld
 > Please make sure to undo this to avoid issues with your installation
 > cause by incompatibilities, such as DKMS failing to load modules
