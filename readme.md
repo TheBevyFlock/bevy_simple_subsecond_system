@@ -20,7 +20,7 @@ Please report all hotpatch-related problems to them :)
 First, we need to install a specific version of the Dioxus CLI.
 
 ```sh
-cargo install dioxus-cli --git https://github.com/laundmo/dioxus --branch=subsecond-fuse-ld
+cargo install dioxus-cli --git https://github.com/DioxusLabs/dioxus --rev=937e9b978935b1daa59d79f4e073cf39a5c4e662
 ```
 
 Depending on your OS, you'll have to set up your environment a bit more:
@@ -74,14 +74,61 @@ rustflags = [
 ]
 ```
 
-This repo includes `./.cargo/config_faster_builds.toml` which contains other compile-time improving configs known to work with subsecond.
-
 > ⚠️ WARNING
 > In the past we recommended symlinking mold over /usr/bin/ld
 > Please make sure to undo this to avoid issues with your installation
 > cause by incompatibilities, such as DKMS failing to load modules
 
 </details>
+
+<details>
+<summary>
+Steps to get maximum performance
+</summary>
+
+- Use nightly Rust
+- Install mold and clang through your package manager
+- Install cranelift with `rustup component add rustc-codegen-cranelift-preview --toolchain nightly`
+- Put the following config in your global `~/.cargo/config.toml` or local `./.cargo/config.toml`:
+```toml
+[unstable]
+codegen-backend = true
+
+[profile]
+incremental = true
+
+[profile.dev]
+codegen-backend = "cranelift"
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+codegen-backend = "llvm"
+
+[profile.test.package."*"]
+codegen-backend = "llvm"
+
+[profile.release]
+codegen-backend = "llvm"
+
+[profile.web]
+codegen-backend = "llvm"
+
+[target.x86_64-unknown-linux-gnu]
+linker = "clang"
+rustflags = [
+  "-Clink-arg=-fuse-ld=mold",
+  "-Zshare-generics=y",
+  "-Zthreads=8",
+]
+```
+
+If you run into trouble, replace `mold` with `lld`.
+
+This repo also includes `./.cargo/config_faster_builds.toml` which contains more advanced compile-time improving configs known to work with subsecond.
+
+
+</details>
+
 
 ## Usage
 
@@ -136,6 +183,24 @@ e.g.
 ```sh
 dx serve --hot-patch --example patch_on_update
 ```
+
+## Features
+
+- Change systems' and observers' code and see the effect live at runtime
+- If your system calls other functions, you can also change those functions' code at runtime
+- Extremely small API: You only need the plugin struct and the `#[hot]` attribute
+- Automatically compiles itself out on release builds and when targetting Wasm. The `#[hot]` attribute does simply nothing on such builds.
+
+## Known Limitations
+
+- A change in the definition of structs that appear in hot-patched systems at runtime will result in your query failing to match, as that new type does not exist in `World` yet.
+  - Practically speaking, this means you should not change the definition of `Resource`s and `Component`s of your system at runtime
+- Only [the topmost binary is hotpatched](https://github.com/DioxusLabs/dioxus/issues/4160), meaning your app is not allowed to have a `lib.rs` or a workspace setup.
+- Attaching a debugger is problaby not going to work. Let me know if you try!
+- I did not test all possible ways in which systems can be used. Does piping work? Does `bevy_mod_debugdump` still work? Maybe. Let me know!
+- Only functions that exist when the app is launched are considered while hotpatching. This means that if you have a system `A` that calls a function `B`, 
+  changing `B` will only work at runtime if that function existed already when the app was launched.
+- Does nothing on Wasm. This is not a technical limitation, just something we didn't implement yet..
 
 ## Language Servers
 
@@ -215,24 +280,6 @@ Replace `#[hot]` with `#[hot(hot_patch_signature = true)]` to allow changing a s
 This allows you to e.g. add additional `Query` or `Res` parameters or modify existing ones.
 </details>
 
-
-## Features
-
-- Change systems' and observers' code and see the effect live at runtime
-- If your system calls other functions, you can also change those functions' code at runtime
-- Extremely small API: You only need the plugin struct and the `#[hot]` attribute
-- Automatically compiles itself out on release builds and when targetting Wasm. The `#[hot]` attribute does simply nothing on such builds.
-
-## Known Limitations
-
-- A change in the definition of structs that appear in hot-patched systems at runtime will result in your query failing to match, as that new type does not exist in `World` yet.
-  - Practically speaking, this means you should not change the definition of `Resource`s and `Component`s of your system at runtime
-- Only [the topmost binary is hotpatched](https://github.com/DioxusLabs/dioxus/issues/4160), meaning your app is not allowed to have a `lib.rs` or a workspace setup.
-- Attaching a debugger is problaby not going to work. Let me know if you try!
-- I did not test all possible ways in which systems can be used. Does piping work? Does `bevy_mod_debugdump` still work? Maybe. Let me know!
-- Only functions that exist when the app is launched are considered while hotpatching. This means that if you have a system `A` that calls a function `B`, 
-  changing `B` will only work at runtime if that function existed already when the app was launched.
-- Does nothing on Wasm. This is not a technical limitation, just something we didn't implement yet..
 
 ## Compatibility
 
