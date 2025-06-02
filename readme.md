@@ -19,7 +19,7 @@ Please report all hotpatch-related problems to them :)
 
 First, we need to install the Dioxus CLI of the newest alpha build.
 ```sh
-cargo install dioxus-cli@0.7.0-alpha.1 -y
+cargo install dioxus-cli@0.7.0-alpha.1
 ```
 > Building the CLI like this can take a while. To speed this up,
 > consider setting up [cargo-binstall](https://github.com/cargo-bins/cargo-binstall) first.
