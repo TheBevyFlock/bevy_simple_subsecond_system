@@ -53,7 +53,9 @@ impl Plugin for SimpleSubsecondPlugin {
         );
         #[cfg(target_family = "wasm")]
         {
-            warn!("Hotpatching is not supported on Wasm yet. Disabling SimpleSubsecondPlugin.");
+            bevy_log::warn!(
+                "Hotpatching is not supported on Wasm yet. Disabling SimpleSubsecondPlugin."
+            );
             return;
         }
         #[cfg(not(debug_assertions))]
