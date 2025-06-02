@@ -14,18 +14,19 @@ Please report all hotpatch-related problems to them :)
 <https://github.com/user-attachments/assets/a44e446b-b2bb-4e10-81c3-3f20cccadea0>
 
 
-
 ## First Time Installation
 
-First, we need to install a specific version of the Dioxus CLI.
 
+First, we need to install the Dioxus CLI of the newest alpha build.
 ```sh
-cargo install dioxus-cli --git https://github.com/DioxusLabs/dioxus --rev=937e9b978935b1daa59d79f4e073cf39a5c4e662
+cargo install dioxus-cli@0.7.0-alpha.1 -y
 ```
+> Building the CLI like this can take a while. To speed this up,
+consider setting up [cargo-binstall](https://github.com/cargo-bins/cargo-binstall) first.
 
 Depending on your OS, you'll have to set up your environment a bit more:
 
-#### Windows
+### Windows
 For some users, this should work out of the box on Windows
 
 <details>
@@ -49,13 +50,13 @@ for incremental builds is `256`, and for non-incremental builds `16`.
 
 </details>
 
-#### MacOS
+### MacOS
 
 
 You're in luck! Everything should work out of the box if you use the default system linker.
 
 
-#### Linux
+### Linux
 
 Prerequisites: `clang` and either `lld` (recommended) or `mold` (faster, but less stable)
 
@@ -132,10 +133,10 @@ This repo also includes `./.cargo/config_faster_builds.toml` which contains more
 
 ## Usage
 
-Add the crate to your dependencies. Make sure to depend on the git version:
+Add the crate to your dependencies.
 
 ```sh
-cargo add bevy_simple_subsecond_system --git https://github.com/TheBevyFlock/bevy_simple_subsecond_system
+cargo add bevy_simple_subsecond_system
 ```
 
 Then add the plugin to your app and annotate any system you want with `#[hot]`:
@@ -164,7 +165,12 @@ fn greet(time: Res<Time>) {
 Now run your app with
 
 ```sh
-dx serve --hot-patch
+BEVY_ASSET_ROOT="." dx serve --hot-patch
+```
+
+or on Windows' PowerShell
+```pwsh
+$env:BEVY_ASSET_ROOT="." ; dx serve --hot-patch
 ```
 
 Now try changing that string at runtime and then check your logs!
@@ -176,12 +182,12 @@ In general, you can only change the code *inside* the function at runtime. See t
 
 Run the examples with
 ```sh
-dx serve --hot-patch --example name_of_the_example
+BEVY_ASSET_ROOT="." dx serve --hot-patch --example name_of_the_example
 ```
 
 e.g.
 ```sh
-dx serve --hot-patch --example patch_on_update
+BEVY_ASSET_ROOT="." dx serve --hot-patch --example patch_on_update
 ```
 
 ## Features

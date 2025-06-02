@@ -24,7 +24,7 @@ bevy_ecs_macros = { version = "0.16.0" }
 bevy_reflect = { version = "0.16.0" }
 bevy_utils = { version = "0.16.0" }
 bevy_internal = { version = "0.16.0", features = ["track_location"] }
-dioxus-devtools = { version = "0.7.0-alpha.0", git = "https://github.com/DioxusLabs/dioxus.git", rev = "b2bd1f" }
+dioxus-devtools = "0.7.0-alpha.1"
 bevy_simple_subsecond_system_macros = { path = "macros", version = "0.1.9" }
 crossbeam-channel = "0.5.15"
 send_wrapper = "0.6.0"

@@ -1881,13 +1881,15 @@ dependencies = [
 
 [[package]]
 name = "dioxus-cli-config"
-version = "0.7.0-alpha.0"
-source = "git+https://github.com/DioxusLabs/dioxus.git?rev=b2bd1f#b2bd1f48d434becfff9f0ea390ad8ef46996300a"
+version = "0.7.0-alpha.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3fd0ba83fe297b4509423853acb11bf0ef0dffa8c603b0857d8fd07d0da5107c"
 
 [[package]]
 name = "dioxus-core"
-version = "0.7.0-alpha.0"
-source = "git+https://github.com/DioxusLabs/dioxus.git?rev=b2bd1f#b2bd1f48d434becfff9f0ea390ad8ef46996300a"
+version = "0.7.0-alpha.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a0a6891a06145a8c7e27892f7532efafd3e0e5e0fe3dd156ce87067bb0040aab"
 dependencies = [
  "const_format",
  "dioxus-core-types",
@@ -1907,16 +1909,15 @@ dependencies = [
 
 [[package]]
 name = "dioxus-core-types"
-version = "0.7.0-alpha.0"
-source = "git+https://github.com/DioxusLabs/dioxus.git?rev=b2bd1f#b2bd1f48d434becfff9f0ea390ad8ef46996300a"
-dependencies = [
- "once_cell",
-]
+version = "0.7.0-alpha.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aaf7456e7733e3fc014f0f860680f5b0b8f4a7a70ae31143f99b1ef74b6c9ba2"
 
 [[package]]
 name = "dioxus-devtools"
-version = "0.7.0-alpha.0"
-source = "git+https://github.com/DioxusLabs/dioxus.git?rev=b2bd1f#b2bd1f48d434becfff9f0ea390ad8ef46996300a"
+version = "0.7.0-alpha.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "694419010472aa7a9787cb3a299aecc0a6c08eb5c277e9f51a4520a669b2ba46"
 dependencies = [
  "dioxus-cli-config",
  "dioxus-core",
@@ -1933,8 +1934,9 @@ dependencies = [
 
 [[package]]
 name = "dioxus-devtools-types"
-version = "0.7.0-alpha.0"
-source = "git+https://github.com/DioxusLabs/dioxus.git?rev=b2bd1f#b2bd1f48d434becfff9f0ea390ad8ef46996300a"
+version = "0.7.0-alpha.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a7da8e3e136b6714ce769d4cf3e1c27d29fc0da3818042fad85a21aef2f3268d"
 dependencies = [
  "dioxus-core",
  "serde",
@@ -1943,14 +1945,14 @@ dependencies = [
 
 [[package]]
 name = "dioxus-signals"
-version = "0.7.0-alpha.0"
-source = "git+https://github.com/DioxusLabs/dioxus.git?rev=b2bd1f#b2bd1f48d434becfff9f0ea390ad8ef46996300a"
+version = "0.7.0-alpha.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "87aac5473b2a6a78fa0d386276f42e313df10ef5c297b33bdb2d962404161750"
 dependencies = [
  "dioxus-core",
  "futures-channel",
  "futures-util",
  "generational-box",
- "once_cell",
  "parking_lot",
  "rustc-hash 2.1.1",
  "tracing",
@@ -2250,8 +2252,9 @@ dependencies = [
 
 [[package]]
 name = "generational-box"
-version = "0.7.0-alpha.0"
-source = "git+https://github.com/DioxusLabs/dioxus.git?rev=b2bd1f#b2bd1f48d434becfff9f0ea390ad8ef46996300a"
+version = "0.7.0-alpha.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5b653b09dec5836ba2dcbfafcc9cdf4afedec51e89beccb908a588cb8fbb4863"
 dependencies = [
  "parking_lot",
  "tracing",
@@ -4083,8 +4086,9 @@ dependencies = [
 
 [[package]]
 name = "subsecond"
-version = "0.7.0-alpha.0"
-source = "git+https://github.com/DioxusLabs/dioxus.git?rev=b2bd1f#b2bd1f48d434becfff9f0ea390ad8ef46996300a"
+version = "0.7.0-alpha.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "43c5b40acd555d02d9a0b5bf4080dbf2cd085d5e2eb2ae7851cb14b9bf5af15c"
 dependencies = [
  "js-sys",
  "libc",
@@ -4101,8 +4105,9 @@ dependencies = [
 
 [[package]]
 name = "subsecond-types"
-version = "0.7.0-alpha.0"
-source = "git+https://github.com/DioxusLabs/dioxus.git?rev=b2bd1f#b2bd1f48d434becfff9f0ea390ad8ef46996300a"
+version = "0.7.0-alpha.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bedadae58a56e137ac970c38c44bff38cee24400fef64c37d5a188a065b1ec1f"
 dependencies = [
  "serde",
 ]
