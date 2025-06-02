@@ -22,7 +22,7 @@ First, we need to install the Dioxus CLI of the newest alpha build.
 cargo install dioxus-cli@0.7.0-alpha.1 -y
 ```
 > Building the CLI like this can take a while. To speed this up,
-consider setting up [cargo-binstall](https://github.com/cargo-bins/cargo-binstall) first.
+> consider setting up [cargo-binstall](https://github.com/cargo-bins/cargo-binstall) first.
 
 Depending on your OS, you'll have to set up your environment a bit more:
 
