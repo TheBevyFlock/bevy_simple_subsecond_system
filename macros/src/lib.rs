@@ -132,11 +132,6 @@ pub fn hot(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     if !hot_patch_signature && !rerun_on_hot_patch {
         let result = quote! {
-            //#[cfg(any(target_family = "wasm", not(debug_assertions)))]
-            //#vis fn #original_fn_name #impl_generics(#inputs) #where_clause #original_output {
-            //    #block
-            //}
-
             #[cfg(debug_assertions)]
             #[allow(unused_mut)]
             #vis fn #original_fn_name #impl_generics(#inputs) #where_clause #original_output {
@@ -214,10 +209,6 @@ pub fn hot(attr: TokenStream, item: TokenStream) -> TokenStream {
     };
 
     let result = quote! {
-        //#[cfg(any(target_family = "wasm", not(debug_assertions)))]
-        //#vis fn #original_fn_name #impl_generics(#inputs) #where_clause #original_output {
-        //    #block
-        //}
         // Outer entry point: stable ABI, hot-reload safe
         #[cfg(debug_assertions)]
         #vis fn #original_fn_name #impl_generics(world: &mut ::bevy_simple_subsecond_system::__macros_internal::World) #where_clause #original_output {
