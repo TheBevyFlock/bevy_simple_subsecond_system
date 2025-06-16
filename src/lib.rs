@@ -90,7 +90,6 @@ impl Plugin for SimpleSubsecondPlugin {
                 let ws = WebSocket::new(&url).unwrap();
 
                 // Set the onmessage handler to bounce messages off to the main dioxus loop
-                //let tx_ = tx.clone();
                 ws.set_onmessage(Some(
                     Closure::<dyn FnMut(MessageEvent)>::new(move |e: MessageEvent| {
                         let Ok(text) = e.data().dyn_into::<JsString>() else {
@@ -109,7 +108,6 @@ impl Plugin for SimpleSubsecondPlugin {
                                     unsafe { apply_patch(jumptable).unwrap() };
                                     sender.send(HotPatched).unwrap();
                                 }
-                                //_ = tx_.unbounded_send(hr),
                             },
                             Ok(_) => {
                                 // Other devserver messages not used
