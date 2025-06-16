@@ -89,7 +89,6 @@ impl Plugin for SimpleSubsecondPlugin {
 
                 let ws = WebSocket::new(&url).unwrap();
 
-                // Set the onmessage handler to bounce messages off to the main dioxus loop
                 ws.set_onmessage(Some(
                     Closure::<dyn FnMut(MessageEvent)>::new(move |e: MessageEvent| {
                         let Ok(text) = e.data().dyn_into::<JsString>() else {
