@@ -4,14 +4,17 @@
 
 pub mod migration;
 
-#[cfg(all(not(target_family = "wasm"), debug_assertions))]
+#[cfg(debug_assertions)]
 use __macros_internal::__HotPatchedSystems as HotPatchedSystems;
 use bevy_app::{App, Last, Plugin, PostStartup, PreUpdate};
 use bevy_ecs::prelude::*;
 pub use bevy_simple_subsecond_system_macros::*;
 pub use dioxus_devtools;
-#[cfg(all(not(target_family = "wasm"), debug_assertions))]
+#[cfg(debug_assertions)]
 use dioxus_devtools::{subsecond::apply_patch, *};
+
+#[cfg(target_arch = "wasm32")]
+use web_sys::{window, CloseEvent, MessageEvent, WebSocket, wasm_bindgen::{closure::Closure, JsCast, JsValue}, js_sys::JsString};
 
 pub mod hot_patched_app;
 
@@ -51,20 +54,15 @@ impl Plugin for SimpleSubsecondPlugin {
             )
                 .chain(),
         );
-        #[cfg(target_family = "wasm")]
-        {
-            bevy_log::warn!(
-                "Hotpatching is not supported on Wasm yet. Disabling SimpleSubsecondPlugin."
-            );
-            return;
-        }
         #[cfg(not(debug_assertions))]
         {
             return;
         }
-        #[cfg(all(not(target_family = "wasm"), debug_assertions))]
+        #[cfg(debug_assertions)]
         {
             let (sender, receiver) = crossbeam_channel::bounded::<HotPatched>(1);
+
+            #[cfg(not(target_arch = "wasm32"))]
             connect(move |msg| {
                 if let DevserverMsg::HotReload(hot_reload_msg) = msg {
                     if let Some(jumptable) = hot_reload_msg.jump_table {
@@ -75,6 +73,63 @@ impl Plugin for SimpleSubsecondPlugin {
                     }
                 }
             });
+
+            #[cfg(target_arch = "wasm32")]
+            {
+                let location = web_sys::window().unwrap().location();
+                let url = format!(
+                    "{protocol}//{host}/_dioxus?build_id={build_id}",
+                    protocol = match location.protocol().unwrap() {
+                        prot if prot == "https:" => "wss:",
+                        _ => "ws:",
+                    },
+                    host = location.host().unwrap(),
+                    build_id = dioxus_cli_config::build_id(),
+                );
+
+                let ws = WebSocket::new(&url).unwrap();
+
+                // Set the onmessage handler to bounce messages off to the main dioxus loop
+                //let tx_ = tx.clone();
+                ws.set_onmessage(Some(
+                    Closure::<dyn FnMut(MessageEvent)>::new(move |e: MessageEvent| {
+                        let Ok(text) = e.data().dyn_into::<JsString>() else {
+                            return;
+                        };
+
+                        // The devserver messages have some &'static strs in them, so we need to leak the source string
+                        let string: String = text.into();
+                        let string = Box::leak(string.into_boxed_str());
+
+                        match serde_json::from_str::<DevserverMsg>(string) {
+                            Ok(DevserverMsg::HotReload(hr)) => {
+                                if let Some(jumptable) = hr.jump_table {
+                                    // SAFETY: This is not unsafe, but anything using the updated jump table is.
+                                    // The table must be built carefully
+                                    unsafe { apply_patch(jumptable).unwrap() };
+                                    sender.send(HotPatched).unwrap();
+                                }
+                                //_ = tx_.unbounded_send(hr),
+                            },
+                            Ok(_) => {
+                                // Other devserver messages not used
+                            },
+                            Err(e) => web_sys::console::error_1(
+                                &format!("Error parsing devserver message: {}", e).into(),
+                            ),
+                            e => {
+                                web_sys::console::error_1(
+                                    &format!("Error parsing devserver message: {:?}", e).into(),
+                                );
+                            }
+                        }
+                    })
+                    .into_js_value()
+                    .as_ref()
+                    .unchecked_ref()
+                )); 
+            }
+            
 
             app.init_resource::<HotPatchedSystems>();
 

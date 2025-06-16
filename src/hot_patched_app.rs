@@ -7,7 +7,7 @@ use bevy_app::{
 };
 use bevy_derive::{Deref, DerefMut};
 use bevy_ecs::prelude::*;
-#[cfg(all(not(target_family = "wasm"), debug_assertions))]
+#[cfg(debug_assertions)]
 use bevy_ecs::system::{Commands, Res};
 use bevy_ecs_macros::ScheduleLabel;
 use bevy_log::{debug, error};
