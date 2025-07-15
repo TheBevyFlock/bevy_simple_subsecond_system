@@ -14,7 +14,12 @@ pub use dioxus_devtools;
 use dioxus_devtools::{subsecond::apply_patch, *};
 
 #[cfg(target_arch = "wasm32")]
-use web_sys::{window, CloseEvent, MessageEvent, WebSocket, wasm_bindgen::{closure::Closure, JsCast, JsValue}, js_sys::JsString};
+use web_sys::{
+    CloseEvent, MessageEvent, WebSocket,
+    js_sys::JsString,
+    wasm_bindgen::{JsCast, JsValue, closure::Closure},
+    window,
+};
 
 pub mod hot_patched_app;
 
@@ -107,10 +112,10 @@ impl Plugin for SimpleSubsecondPlugin {
                                     unsafe { apply_patch(jumptable).unwrap() };
                                     sender.send(HotPatched).unwrap();
                                 }
-                            },
+                            }
                             Ok(_) => {
                                 // Other devserver messages not used
-                            },
+                            }
                             Err(e) => web_sys::console::error_1(
                                 &format!("Error parsing devserver message: {}", e).into(),
                             ),
@@ -123,10 +128,9 @@ impl Plugin for SimpleSubsecondPlugin {
                     })
                     .into_js_value()
                     .as_ref()
-                    .unchecked_ref()
-                )); 
+                    .unchecked_ref(),
+                ));
             }
-            
 
             app.init_resource::<HotPatchedSystems>();
 
