@@ -195,7 +195,7 @@ BEVY_ASSET_ROOT="." dx serve --hot-patch --example patch_on_update
 - Change systems' and observers' code and see the effect live at runtime
 - If your system calls other functions, you can also change those functions' code at runtime
 - Extremely small API: You only need the plugin struct and the `#[hot]` attribute
-- Automatically compiles itself out on release builds and when targetting Wasm. The `#[hot]` attribute does simply nothing on such builds.
+- Automatically compiles itself out on release builds. The `#[hot]` attribute does simply nothing on such builds.
 
 ## Known Limitations
 
@@ -206,7 +206,6 @@ BEVY_ASSET_ROOT="." dx serve --hot-patch --example patch_on_update
 - I did not test all possible ways in which systems can be used. Does piping work? Does `bevy_mod_debugdump` still work? Maybe. Let me know!
 - Only functions that exist when the app is launched are considered while hotpatching. This means that if you have a system `A` that calls a function `B`, 
   changing `B` will only work at runtime if that function existed already when the app was launched.
-- Does nothing on Wasm. This is not a technical limitation, just something we didn't implement yet..
 
 ## Language Servers
 
