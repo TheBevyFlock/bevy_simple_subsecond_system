@@ -1069,8 +1069,11 @@ dependencies = [
  "bevy_simple_subsecond_system_macros",
  "bevy_utils",
  "crossbeam-channel",
+ "dioxus-cli-config",
  "dioxus-devtools",
  "send_wrapper",
+ "serde_json",
+ "web-sys",
 ]
 
 [[package]]
@@ -1884,6 +1887,9 @@ name = "dioxus-cli-config"
 version = "0.7.0-alpha.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3fd0ba83fe297b4509423853acb11bf0ef0dffa8c603b0857d8fd07d0da5107c"
+dependencies = [
+ "wasm-bindgen",
+]
 
 [[package]]
 name = "dioxus-core"
