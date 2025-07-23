@@ -178,6 +178,31 @@ Now try changing that string at runtime and then check your logs!
 Note that changing the `greet` function's signature at runtime by e.g. adding a new parameter will still require a restart.
 In general, you can only change the code *inside* the function at runtime. See the *Advanced Usage* section for more.
 
+## Alternative Method
+```rust,ignore
+use bevy::prelude::*;
+use bevy_simple_subsecond_system::prelude::*;
+
+fn main() -> AppExit {
+    App::new()
+        .add_plugins(DefaultPlugins)
+        .add_plugins(SimpleSubsecondPlugin::default())
+        .with_hot_patch(|app: &mut App| {
+          app.add_systems(Update, greet)
+        })
+        .run()
+}
+
+fn greet(time: Res<Time>) {
+    info_once!(
+        "Hello from a hotpatched system! Try changing this string while the app is running! Patched at t = {} s",
+        time.elapsed_secs()
+    );
+}
+```
+
+This method allows you to add/remove new systems at runtime. See `examples/add_systems` for more info.
+
 ## Examples
 
 Run the examples with
