@@ -39,9 +39,6 @@ rustc-wrapper = "/home/hhh/.cargo/bin/sccache"
 target-dir = "/home/hhh/.cargo/global-target"
 
 [target.x86_64-unknown-linux-gnu]
-# Note: make sure you've installed dioxus CLI with
-# cargo install dioxus-cli --git https://github.com/laundmo/dioxus --branch=subsecond-fuse-ld
-# otherwise linker= and link-arg=-fuse-ld= won't work
 linker = "clang"
 rustflags = [
     "-C",
